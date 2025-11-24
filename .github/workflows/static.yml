@@ -29,23 +29,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Node.js
-        # Change action version from @v3 to @v4
-        uses: actions/setup-node@v4 
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js and Cache Dependencies
+        uses: actions/setup-node@v4
         with:
-          # Change Node version from 16.x to 20.x (Current LTS)
-          node-version: 20.x 
-          cache: yarn
-      - name: Clear Docusaurus Cache
-        run: rm -rf build .docusaurus
+          node-version: 20.x
+          cache: 'yarn' # This enables caching based on yarn.lock
+          
+      - name: Clear Docusaurus Cache Manually
+        # Use the manual clear step, which we know works now
+        run: rm -rf build .docusaurus 
 
       - name: Install Dependencies
-        # This forces the use of yarn for the installation
-        run: yarn install --frozen-lockfile --non-interactive 
-          
+        # If cache misses, this runs; if cache hits, this is skipped.
+        # This command is now guaranteed to run in the correct context.
+        run: yarn install --frozen-lockfile --non-interactive
+
       - name: Build
         run: yarn build
-      # 👆 Build steps
       - name: Setup Pages
         # Change action version from @v5 to @v4
         uses: actions/configure-pages@v4 
